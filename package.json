@@ -1,0 +1,25 @@
+{
+  "name": "koa-cognito-middleware",
+  "version": "1.0.0",
+  "description": "Koa middleware for AWS Cognito integration.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uhop/koa-cognito-middleware.git"
+  },
+  "keywords": [
+    "koa",
+    "middleware",
+    "aws",
+    "cognito"
+  ],
+  "author": "Eugene Lazutkin <eugene.lazutkin@gmail.com> (https://ww.lazutkin.com)",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/uhop/koa-cognito-middleware/issues"
+  },
+  "homepage": "https://github.com/uhop/koa-cognito-middleware#readme"
+}
