@@ -18,9 +18,13 @@ const preparePems = async () => {
   const jwks = await new Promise(resolve => {
     let data = '';
     const clientRequest = https.request(issuer + '/.well-known/jwks.json', response => {
+      if (response.statusCode >= 400) {
+        debug('Bad status code: ' + response.statusCode);
+        return resolve(null);
+      }
       response.setEncoding('utf8');
       response.on('data', chunk => (data += chunk));
-      response.on('end', () => resolve(JSON.parse(data)));
+      response.on('end', () => resolve(data ? JSON.parse(data) : null));
     });
     clientRequest.on('error', error => {
       debug('Cannot retrieve jwks from the user pool: ' + issuer);
