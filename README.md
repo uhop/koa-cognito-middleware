@@ -119,8 +119,85 @@ This is a helper function, which checks runs a validator. If not it rejects a re
 The latter two parameters are arrays of strings listing `cognito:groups` and `scope` items respectively.
 `validator` should return a truthy value, if a user is allowed to perform an action, and a falsy value otherwise.
 
+## Utilties: `utils/renewableAccessToken`
+
+### `retrieveToken(url, clientId, secret)`
+
+This **asynchronous** function takes a URL (usually in the form of *Cognito user pool DNS*`/oauth2/token`), an app client ID and an app client secret (all as strings)
+and retrieves an access token (see [TOKEN Endpoint](https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html), the part on `client_credentials`).
+
+Warning: the function always uses `https` protocol, which is a default for Cognito pools.
+
+The function schedules itself to run when a token is about to expire. The exact algorithm is `expires_in` (defined in the token structure) minus 5 minutes.
+If the result is negative, it will run in a half of `expires_in` time.
+
+While the function resolves its return in a token structure, do not save it because it can be updated over time. Always use `getToken()` function (described below) before using a token.
+
+Example:
+
+```js
+const {retrieveToken} = require('koa-cognito-middleware');
+
+// ...
+
+const doIt = async () => {
+  // every time we call it, it retrieves a token from a server
+  const token = await retrieveToken(
+    'https://auth.my-custom-domain/oauth2/token',
+    process.env.AUTH_CLIENT_ID,
+    process.env.AUTH_CLIENT_SECRET
+  );
+  // use the token immediately: it can be changed next time you need it
+  const options = {
+    protocol: 'https',
+    hostname: 'api.my-custom-domain.com',
+    path: '/items',
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Authorization: token.access_token
+    }
+  };
+  // do a call ...
+};
+```
+
+### `getToken()`
+
+This synchronous function returns the current token whatever it is. If it was not retrieved yet, it will return `null`.
+
+Example:
+
+```js
+// rewriting the previous example
+
+const {retrieveToken, getToken} = require('koa-cognito-middleware');
+
+const authorize = () => {
+  // this function can be called multiple times
+  // it calls the retrieveToken() only when necessary
+  // and getToken() always returns the fresh token
+  if (!getToken()) {
+    return retrieveToken(
+      'https://auth.my-custom-domain/oauth2/token',
+      process.env.AUTH_CLIENT_ID,
+      process.env.AUTH_CLIENT_SECRET
+    );
+  }
+};
+
+// ...
+
+const doIt = async () => {
+  await authorize(); // we can call it many times without taxing the auth system
+  const token = getToken(); // totally safe to get a token like that
+  // like in the previous example ...
+};
+```
+
 # Versions
 
+- 1.1.0 &mdash; *Added a utility to auto-retrieve an access token by client ID and a secret*
 - 1.0.0 &mdash; *The initial public release*
 
 # License
