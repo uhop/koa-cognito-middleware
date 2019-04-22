@@ -15,7 +15,6 @@ const retrieveToken = async (uri, username, password) => {
   token = await new Promise((resolve, reject) => {
     const urlObject = url.parse(uri);
     const options = {
-      protocol: urlObject.protocol,
       hostname: urlObject.hostname,
       port: urlObject.port || 443,
       path: urlObject.path,
