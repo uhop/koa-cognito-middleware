@@ -119,7 +119,61 @@ This is a helper function, which checks runs a validator. If not it rejects a re
 The latter two parameters are arrays of strings listing `cognito:groups` and `scope` items respectively.
 `validator` should return a truthy value, if a user is allowed to perform an action, and a falsy value otherwise.
 
-## Utilties: `utils/renewableAccessToken`
+## Utilities: `utils/lazyAccessToken`
+
+It is a helper to retrieve an access token lazily on demand.
+
+### `setCredentials(url, clientId, secret)`
+
+This synchronous function sets credentials for future authentications. It takes a URL (usually in the form of *Cognito user pool DNS*`/oauth2/token`),
+an app client ID and an app client secret (all as strings) and retrieves an access token
+(see [TOKEN Endpoint](https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html), the part on `client_credentials`).
+
+### `getToken()`
+
+This synchronous function returns the current token whatever it is. If it was not retrieved yet, it will return `null`.
+
+### `authorize()`
+
+This **asynchronous** function checks if there is an unexpired token and retrieves it, if required. It uses credentials set by `setCredentials()` (see above).
+As a result it returns a token or `null`, if credentials were not set. After running this function the current token can be obtained with `getToken()` (see above).
+
+Examples:
+
+```js
+const {setCredentials, authorize} = require('koa-cognito-middleware/utils/lazyAccessToken');
+
+// ...
+
+setCredentials(
+  'https://auth.my-custom-domain/oauth2/token',
+  process.env.AUTH_CLIENT_ID,
+  process.env.AUTH_CLIENT_SECRET
+);
+
+// ...
+
+const doIt = async () => {
+  // every time we call it, it retrieves a token from a server
+  const token = await authorize();
+  // use the token immediately: it can be changed next time you need it
+  const options = {
+    protocol: 'https',
+    hostname: 'api.my-custom-domain.com',
+    path: '/items',
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Authorization: token.access_token
+    }
+  };
+  // do a call ...
+};
+```
+
+## Utilities: `utils/renewableAccessToken`
+
+It is a helper to retrieve an access token on demand, then renew it by a timer automatically.
 
 ### `retrieveToken(url, clientId, secret)`
 
@@ -136,7 +190,7 @@ While the function resolves its return in a token structure, do not save it beca
 Example:
 
 ```js
-const {retrieveToken} = require('koa-cognito-middleware');
+const {retrieveToken} = require('koa-cognito-middleware/utils/renewableAccessToken');
 
 // ...
 
@@ -171,7 +225,7 @@ Example:
 ```js
 // rewriting the previous example
 
-const {retrieveToken, getToken} = require('koa-cognito-middleware');
+const {retrieveToken, getToken} = require('koa-cognito-middleware/utils/renewableAccessToken');
 
 const authorize = () => {
   // this function can be called multiple times
@@ -197,6 +251,7 @@ const doIt = async () => {
 
 # Versions
 
+- 1.2.0 &mdash; *Added a utility to lazily retrieve an access token by client ID and a secret*
 - 1.1.0 &mdash; *Added a utility to auto-retrieve an access token by client ID and a secret*
 - 1.0.0 &mdash; *The initial public release*
 
