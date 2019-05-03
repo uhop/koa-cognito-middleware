@@ -1,80 +1,22 @@
 'use strict';
 
-const https = require('https');
-
-const debug = require('debug')('koa:cognito-middleware');
-const jwt = require('jsonwebtoken');
-const jwkToPem = require('jwk-to-pem');
+const makeGetUser = require('cognito-toolkit');
 
 const getTokenFromHeader = header => {
   header = header.toLowerCase();
   return ctx => ctx.headers[header] || null;
 };
 
-let issuer = null,
-  pems = null;
-
-const preparePems = async () => {
-  const jwks = await new Promise(resolve => {
-    let data = '';
-    const clientRequest = https.request(issuer + '/.well-known/jwks.json', response => {
-      if (response.statusCode >= 400) {
-        debug('Bad status code: ' + response.statusCode);
-        return resolve(null);
-      }
-      response.setEncoding('utf8');
-      response.on('data', chunk => (data += chunk));
-      response.on('end', () => resolve(data ? JSON.parse(data) : null));
-    });
-    clientRequest.on('error', error => {
-      debug('Cannot retrieve jwks from the user pool: ' + issuer);
-      resolve(null);
-    });
-    clientRequest.end();
-  });
-  pems = {};
-  jwks.keys.forEach(key => (pems[key.kid] = jwkToPem(key)));
-};
-
 const getUser = options => {
-  const opt = {source: 'Authorization', userPoolId: '', region: ''};
+  const opt = {source: 'Authorization', region: '', userPoolId: ''};
   options && Object.assign(opt, options);
   if (typeof opt.source == 'string') {
     opt.source = getTokenFromHeader(opt.source);
   }
-  if (!opt.region) {
-    throw new Error('Region should be specified');
-  }
-  if (!opt.userPoolId) {
-    throw new Error('User pool ID should be specified');
-  }
-  issuer = `https://cognito-idp.${opt.region}.amazonaws.com/${opt.userPoolId}`;
+  const getUser = makeGetUser(opt);
   return async (ctx, next) => {
-    ctx.state.user = null;
     const token = opt.source(ctx);
-    check: if (token) {
-      !pems && await preparePems();
-      const decodedToken = jwt.decode(token, {complete: true});
-      if (!decodedToken) {
-        debug('Invalid token: ' + token);
-        break check;
-      }
-      if (decodedToken.payload.iss !== issuer) {
-        debug('Unexpected user pool: ' + decodedToken.payload.iss);
-        break check;
-      }
-      const pem = pems[decodedToken.header.kid];
-      if (!pem) {
-        debug('Unexpected kid: ' + decodedToken.header.kid);
-        break check;
-      }
-      try {
-        ctx.state.user = jwt.verify(token, pem, {issuer}); // throws errors!
-      } catch (error) {
-        debug('Cannot validate a token: ' + error.message);
-        break check;
-      }
-    }
+    ctx.state.user = await getUser(token);
     return next();
   };
 };
