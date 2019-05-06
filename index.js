@@ -34,7 +34,7 @@ const getUser = options => {
     }
     ctx.state.user = user;
     await next();
-    if (opt.setAuthCookieOptions) ctx.state.user.setAuthCookie(ctx, opt.setAuthCookieOptions);
+    if (opt.setAuthCookieOptions && user) user.setAuthCookie(ctx, opt.setAuthCookieOptions);
   };
 };
 
