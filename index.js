@@ -2,22 +2,39 @@
 
 const makeGetUser = require('cognito-toolkit');
 
-const getTokenFromHeader = header => {
+const getTokenFromHeader = (header, cookie) => {
+  if (!header) return ctx => ctx.cookies.get(cookie) || null;
   header = header.toLowerCase();
-  return ctx => ctx.headers[header] || null;
+  if (!cookie) return ctx => ctx.headers[header] || null;
+  return ctx => ctx.headers[header] || ctx.cookies.get(cookie) || null;
 };
 
 const getUser = options => {
-  const opt = {source: 'Authorization', region: '', userPoolId: ''};
+  const opt = {authHeader: 'Authorization', authCookie: 'auth', region: '', userPoolId: '', setAuthCookieOptions: null};
   options && Object.assign(opt, options);
-  if (typeof opt.source == 'string') {
-    opt.source = getTokenFromHeader(opt.source);
+  if (typeof opt.source != 'function') {
+    opt.source = getTokenFromHeader(opt.authHeader, opt.authCookie);
   }
   const getUser = makeGetUser(opt);
+  const setAuthCookie = (ctx, cookieOptions) => {
+    if (ctx.state.user && opt.authCookie && ctx.cookies.get(opt.authCookie) !== ctx.state.user._token) {
+      ctx.cookie.set(
+        opt.authCookie,
+        ctx.state.user._token,
+        Object.assign({expires: new Date(ctx.state.user.exp * 1000), domain: ctx.host, overwrite: true}, cookieOptions)
+      );
+    }
+  };
   return async (ctx, next) => {
     const token = opt.source(ctx);
-    ctx.state.user = await getUser(token);
-    return next();
+    const user = await getUser(token);
+    if (user) {
+      user._token = token;
+      user.setAuthCookie = setAuthCookie;
+    }
+    ctx.state.user = user;
+    await next();
+    if (opt.setAuthCookieOptions) ctx.state.user.setAuthCookie(ctx, opt.setAuthCookieOptions);
   };
 };
 
@@ -45,8 +62,8 @@ const hasScope = scope => async (ctx, next) => {
 };
 
 const isAllowed = validator => async (ctx, next) => {
-  const scopes = ctx.state.user && ctx.state.user.scope && ctx.state.user.scope.split(' ') || [],
-    groups = ctx.state.user && ctx.state.user['cognito:groups'] || [];
+  const scopes = (ctx.state.user && ctx.state.user.scope && ctx.state.user.scope.split(' ')) || [],
+    groups = (ctx.state.user && ctx.state.user['cognito:groups']) || [];
   const pass = await validator(ctx, groups, scopes);
   if (pass) return next();
   ctx.status = ctx.state.user ? 403 : 401;
