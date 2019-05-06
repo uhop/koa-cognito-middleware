@@ -18,7 +18,7 @@ const getUser = options => {
   const getUser = makeGetUser(opt);
   const setAuthCookie = (ctx, cookieOptions) => {
     if (ctx.state.user && opt.authCookie && ctx.cookies.get(opt.authCookie) !== ctx.state.user._token) {
-      ctx.cookie.set(
+      ctx.cookies.set(
         opt.authCookie,
         ctx.state.user._token,
         Object.assign({expires: new Date(ctx.state.user.exp * 1000), domain: ctx.host, overwrite: true}, cookieOptions)

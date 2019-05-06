@@ -146,6 +146,7 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 
 # Versions
 
+- 1.4.1 &mdash; *Bugfixes*
 - 1.4.0 &mdash; *Added support for an auth cookie*
 - 1.3.0 &mdash; *Split off the common functionality to [cognito-toolkit](https://www.npmjs.com/package/cognito-toolkit)*
 - 1.2.0 &mdash; *Added a utility to lazily retrieve an access token by client ID and a secret*
