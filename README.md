@@ -63,6 +63,13 @@ const validator = async (ctx, groups, scopes) => {
 
 app
   .use(isAllowed(validator))
+  .get('/lift', async ctx => {
+    const user = ctx.state.user;
+    if (user) {
+      user.setAuthCookie(ctx, {domain: 'api.my-domain.com'});
+    }
+    ctx.status = 204;
+  })
   .use(router2.routes())
   .use(router2.allowedMethods());
 
@@ -82,21 +89,36 @@ All provided functions are explained below. See the examples above for usage pat
 
 ## `getUser(options)`
 
-This is the main function directly returned from the module. It populates `ctx.state.user` with a decoded JWT token or assigns it to `null` (cannot positively authenticate).
+This is the main function directly returned from the module. It populates `ctx.state.user` with a decoded JWT or assigns it to `null` (cannot positively authenticate).
 Other helpers or a user's code uses it to authorize or reject the user for a given route.
 
-It takes one argument `options`, which is an object with the following properties:
+Additionally if an authenticated user it adds the following properties:
 
-* `region` &mdash **required** string, which specifies an AWS region, such as `'us-east-1'`. Default: **none**.
-* `userPoolId` &mdash **required** string, which specifies a user pool ID, such as `'us-east-1_MY_USER_POOL'`. Default: **none**.
-* `source` &mdash; optional function or string. Default: `'Authorization'`.
-  * If it is a string, it specifies an HTTP request header name. Its value should be a JWT token supplied by AWS Cognito (`id_token` or `access_token`).
-  * If it is a function, it is called with `ctx` argument, and can inspect a request to produce a JWT token as a string.
+* `_token` &mdash; the original JWT.
+* `setAuthCookie(ctx, options)` &mdash; a function, which when called with `ctx` argument sets a cookie specified by `authCookie` (see below) to `_token`.
+  The optional `options` argument is an object compatible with [options for cookie.set()](https://github.com/pillarjs/cookies#cookiesset-name--value---options--).
+  By default the cookie is set with following options:
+    * `expires` &mdash; an expiration time of a JWT.
+    * `domain` &mdash; a value of `ctx.host`.
+    * `overwrite` &mdash; `true`.
+  `options` will overwrite/augment those values.
+
+`getUser(options)` takes one argument `options`, which is an object with the following properties:
+
+* `region` &mdash; **required** string, which specifies an AWS region, such as `'us-east-1'`. Default: **none**.
+* `userPoolId` &mdash; **required** string, which specifies a user pool ID, such as `'us-east-1_MY_USER_POOL'`. Default: **none**.
+* `authHeader` &mdash; optional string. Default: `'Authorization'`. It specifies an HTTP request header name. Its value should be a JWT supplied by AWS Cognito (`id_token` or `access_token`).
+* `authCookie` &mdash; optional string. Default: `'auth'`. It specifies an HTTP request cookie name. Its value should be a JWT supplied by AWS Cognito (`id_token` or `access_token`).
+* `source` &mdash; optional function. Default: reads `authHeader` header and returns it, if it is not falsy, otherwise reads `authCookie` cookie and returns it, if it is not false, otherwise returns `null`.
+  If it is a function, it is called with `ctx` argument, and can inspect a request to produce a JWT token as a string.
     * Examples:
       ```js
       const getToken1 = ctx => ctx.headers['x-auth-header'];
       const getToken2 = ctx => ctx.cookies.get('auth-token');
       ```
+* `setAuthCookieOptions` &mdash; optional object compatible with [options for cookie.set()](https://github.com/pillarjs/cookies#cookiesset-name--value---options--).
+  If it is `null` (the default), a cookie is not set automatically. Otherwise, it is set every time it is not set or has a different value. When a cookie is set,
+  `setAuthCookieOptions` is used to overwrite/augment the default options described above in `setAuthCookie()`.
 
 This function should be used before any other helpers.
 
@@ -124,6 +146,7 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 
 # Versions
 
+- 1.4.0 &mdash; *Added support for an auth cookie*
 - 1.3.0 &mdash; *Split off the common functionality to [cognito-toolkit](https://www.npmjs.com/package/cognito-toolkit)*
 - 1.2.0 &mdash; *Added a utility to lazily retrieve an access token by client ID and a secret*
 - 1.1.0 &mdash; *Added a utility to auto-retrieve an access token by client ID and a secret*
