@@ -87,7 +87,7 @@ npm install --save koa-cognito-middleware
 
 All provided functions are explained below. See the examples above for usage patterns.
 
-## `getUser(options)`
+## `getUser(options [, pools])`
 
 This is the main function directly returned from the module. It populates `ctx.state.user` with a decoded JWT or assigns it to `null` (cannot positively authenticate).
 Other helpers or a user's code uses it to authorize or reject the user for a given route.
@@ -103,7 +103,7 @@ Additionally if an authenticated user it adds the following properties:
     * `overwrite` &mdash; `true`.
   `options` will overwrite/augment those values.
 
-`getUser(options)` takes one argument `options`, which is an object with the following properties:
+`getUser(options [, pools])` takes `options`, which is an object with the following properties:
 
 * `region` &mdash; **required** string, which specifies an AWS region, such as `'us-east-1'`. Default: **none**.
 * `userPoolId` &mdash; **required** string, which specifies a user pool ID, such as `'us-east-1_MY_USER_POOL'`. Default: **none**.
@@ -119,6 +119,13 @@ Additionally if an authenticated user it adds the following properties:
 * `setAuthCookieOptions` &mdash; optional object compatible with [options for cookie.set()](https://github.com/pillarjs/cookies#cookiesset-name--value---options--).
   If it is `null` (the default), a cookie is not set automatically. Otherwise, it is set every time it is not set or has a different value. When a cookie is set,
   `setAuthCookieOptions` is used to overwrite/augment the default options described above in `setAuthCookie()`.
+
+Optional `pools`, if specified, should be an object with the following properties or an array of such objects:
+
+* `region` &mdash **required** string, which specifies an AWS region, such as `'us-east-1'`. Default: **none**.
+* `userPoolId` &mdash **required** string, which specifies a user pool ID, such as `'us-east-1_MY_USER_POOL'`. Default: **none**.
+
+If `pools` is specified `region` and `userPoolId` of `options` are ignored. Specifying `pools` is the onl way to supply an array of user pools.
 
 This function should be used before any other helpers.
 
@@ -146,13 +153,14 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 
 # Versions
 
-- 1.4.2 &mdash; *More bugfixes*
-- 1.4.1 &mdash; *Bugfixes*
-- 1.4.0 &mdash; *Added support for an auth cookie*
-- 1.3.0 &mdash; *Split off the common functionality to [cognito-toolkit](https://www.npmjs.com/package/cognito-toolkit)*
-- 1.2.0 &mdash; *Added a utility to lazily retrieve an access token by client ID and a secret*
-- 1.1.0 &mdash; *Added a utility to auto-retrieve an access token by client ID and a secret*
-- 1.0.0 &mdash; *The initial public release*
+- 1.4.3 *Added a support for multiple user pools.*
+- 1.4.2 *More bugfixes.*
+- 1.4.1 *Bugfixes.*
+- 1.4.0 *Added support for an auth cookie.*
+- 1.3.0 *Split off the common functionality to [cognito-toolkit](https://www.npmjs.com/package/cognito-toolkit).*
+- 1.2.0 *Added a utility to lazily retrieve an access token by client ID and a secret.*
+- 1.1.0 *Added a utility to auto-retrieve an access token by client ID and a secret.*
+- 1.0.0 *The initial public release.*
 
 # License
 
