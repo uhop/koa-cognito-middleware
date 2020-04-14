@@ -9,13 +9,13 @@ const getTokenFromHeader = (header, cookie) => {
   return ctx => ctx.headers[header] || ctx.cookies.get(cookie) || null;
 };
 
-const getUser = options => {
+const getUser = (options, pools) => {
   const opt = {authHeader: 'Authorization', authCookie: 'auth', region: '', userPoolId: '', setAuthCookieOptions: null};
   options && Object.assign(opt, options);
   if (typeof opt.source != 'function') {
     opt.source = getTokenFromHeader(opt.authHeader, opt.authCookie);
   }
-  const getUser = makeGetUser(opt);
+  const getUser = makeGetUser(pools || opt);
   const setAuthCookie = (ctx, cookieOptions) => {
     if (ctx.state.user && opt.authCookie && ctx.cookies.get(opt.authCookie) !== ctx.state.user._token) {
       ctx.cookies.set(
