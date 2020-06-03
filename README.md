@@ -54,7 +54,7 @@ const router2 = new Router();
 const readMethods = {GET: 1, HEAD: 1, OPTIONS: 1};
 
 const validator = async (ctx, groups, scopes) => {
-  if (readMethods(ctx.method.toUpperCase()) === 1) return true;
+  if (readMethods[ctx.method.toUpperCase()] === 1) return true;
   // only writers can use other methods (POST, PUT, PATCH, DELETE...)
   if (groups.some(g => g === 'user-type/writers')) return true;
   if (scopes.some(s => s === 'writers')) return true;
@@ -167,7 +167,7 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 # Versions
 
 - 1.4.4 *Added support for state's user property name. Thx [Mike Vosseller](https://github.com/mpvosseller)!*
-- 1.4.3 *Added a support for multiple user pools.*
+- 1.4.3 *Added support for multiple user pools.*
 - 1.4.2 *More bugfixes.*
 - 1.4.1 *Bugfixes.*
 - 1.4.0 *Added support for an auth cookie.*
