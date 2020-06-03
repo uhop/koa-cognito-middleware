@@ -123,8 +123,8 @@ Additionally if an authenticated user it adds the following properties:
 
 Optional `pools`, if specified, should be an object with the following properties or an array of such objects:
 
-* `region` &mdash **required** string, which specifies an AWS region, such as `'us-east-1'`. Default: **none**.
-* `userPoolId` &mdash **required** string, which specifies a user pool ID, such as `'us-east-1_MY_USER_POOL'`. Default: **none**.
+* `region` &mdash; **required** string, which specifies an AWS region, such as `'us-east-1'`. Default: **none**.
+* `userPoolId` &mdash; **required** string, which specifies a user pool ID, such as `'us-east-1_MY_USER_POOL'`. Default: **none**.
 
 If `pools` is specified `region` and `userPoolId` of `options` are ignored. Specifying `pools` is the onl way to supply an array of user pools.
 
@@ -141,6 +141,8 @@ const getUser = require('koa-cognito-middleware');
 getUser.stateUserProperty = 'cognitoUser';
 const {isAuthenticated, hasScope, hasGroup, isAllowed} = getUser;
 ```
+
+All other helper functions will use this value to inspect the state's user property.
 
 ## `getUser.isAuthenticated`
 
