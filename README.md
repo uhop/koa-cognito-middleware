@@ -6,8 +6,8 @@
 
 The [Koa](https://koajs.com/) middleware to authenticate and authorized users using [AWS Cognito](https://aws.amazon.com/cognito/)
 [user pools](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html).
-It validates a JWT token (either an id or access token) and populates `ctx.state.user` with its deciphered content.
-Simple helpers are provided to make decisions on accessibility of API endpoints for a given user.
+It validates a JWT token (either an id or access token) and populates `ctx.state.user`, or any other property of your choice,
+with its deciphered content. Simple helpers are provided to make decisions on accessibility of API endpoints for a given user.
 
 # Examples
 
@@ -89,7 +89,8 @@ All provided functions are explained below. See the examples above for usage pat
 
 ## `getUser(options [, pools])`
 
-This is the main function directly returned from the module. It populates `ctx.state.user` with a decoded JWT or assigns it to `null` (cannot positively authenticate).
+This is the main function directly returned from the module. It populates `ctx.state[getUser.stateUserProperty]` (see below)
+with a decoded JWT or assigns it to `null` (cannot positively authenticate).
 Other helpers or a user's code uses it to authorize or reject the user for a given route.
 
 Additionally if an authenticated user it adds the following properties:
@@ -129,18 +130,30 @@ If `pools` is specified `region` and `userPoolId` of `options` are ignored. Spec
 
 This function should be used before any other helpers.
 
+## `getUser.stateUserProperty`
+
+*(Since 1.4.4):* This is a property name to hold a user object. It can be a string or a `Symbol`. Default: `'user'`.
+
+Usually it is assigned right after obtaining `getUser()`:
+
+```js
+const getUser = require('koa-cognito-middleware');
+getUser.stateUserProperty = 'cognitoUser';
+const {isAuthenticated, hasScope, hasGroup, isAllowed} = getUser;
+```
+
 ## `getUser.isAuthenticated`
 
-This is a helper function, which checks if `ctx.state.user` is set. If not it rejects a request with 401 (unauthorized).
+This is a helper function, which checks if the state's user property is set. If not it rejects a request with 401 (unauthorized).
 
 ## `getUser.hasGroup(group)`
 
-This is a helper function, which checks if `ctx.state.user` has `'cognito:groups'` array that includes a given group (as a string).
+This is a helper function, which checks if the state's user property has `'cognito:groups'` array that includes a given group (as a string).
 If not it rejects a request with 403 (forbidden) for valid users and 401 (unauthorized) for non-authenticated users.
 
 ## `getUser.hasScope(scope)`
 
-This is a helper function, which checks if `ctx.state.user` has `'scope'` string that includes a given scope (as a string).
+This is a helper function, which checks if the state's user property has `'scope'` string that includes a given scope (as a string).
 If not it rejects a request with 403 (forbidden) for valid users and 401 (unauthorized) for non-authenticated users.
 
 ## `getUser.isAllowed(validator)`
@@ -153,6 +166,7 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 
 # Versions
 
+- 1.4.4 *Added support for state's user property name. Thx [Mike Vosseller](https://github.com/mpvosseller)!*
 - 1.4.3 *Added a support for multiple user pools.*
 - 1.4.2 *More bugfixes.*
 - 1.4.1 *Bugfixes.*
