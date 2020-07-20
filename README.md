@@ -1,8 +1,7 @@
-# `koa-cognito-middleware`
+# `koa-cognito-middleware` [![NPM version][npm-img]][npm-url]
 
-[![Dependencies][deps-image]][deps-url]
-[![devDependencies][dev-deps-image]][dev-deps-url]
-[![NPM version][npm-image]][npm-url]
+[npm-img]: https://img.shields.io/npm/v/koa-cognito-middleware.svg
+[npm-url]: https://npmjs.org/package/koa-cognito-middleware
 
 The [Koa](https://koajs.com/) middleware to authenticate and authorized users using [AWS Cognito](https://aws.amazon.com/cognito/)
 [user pools](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html).
@@ -168,6 +167,7 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 
 # Versions
 
+- 1.4.5 *Updated dependencies.*
 - 1.4.4 *Added support for state's user property name. Thx [Mike Vosseller](https://github.com/mpvosseller)!*
 - 1.4.3 *Added support for multiple user pools.*
 - 1.4.2 *More bugfixes.*
@@ -181,10 +181,3 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 # License
 
 [The 3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
-
-[npm-image]:       https://img.shields.io/npm/v/koa-cognito-middleware.svg
-[npm-url]:         https://npmjs.org/package/koa-cognito-middleware
-[deps-image]:      https://img.shields.io/david/uhop/koa-cognito-middleware.svg
-[deps-url]:        https://david-dm.org/uhop/koa-cognito-middleware
-[dev-deps-image]:  https://img.shields.io/david/dev/uhop/koa-cognito-middleware.svg
-[dev-deps-url]:    https://david-dm.org/uhop/koa-cognito-middleware?type=dev
