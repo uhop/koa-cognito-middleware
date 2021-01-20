@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/uhop/koa-cognito-middleware#readme",
   "dependencies": {
-    "cognito-toolkit": "^1.0.3"
+    "cognito-toolkit": "^1.0.4"
   },
   "files": [
     "/*.js",
