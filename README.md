@@ -167,6 +167,7 @@ The latter two parameters are arrays of strings listing `cognito:groups` and `sc
 
 # Versions
 
+- 1.4.7 *Updated dependencies. Fix: scope was used incorrectly. Fix: 401 was reported instead of 403.*
 - 1.4.6 *Updated dependencies.*
 - 1.4.5 *Updated dependencies.*
 - 1.4.4 *Added support for state's user property name. Thx [Mike Vosseller](https://github.com/mpvosseller)!*
