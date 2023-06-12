@@ -48,6 +48,7 @@ const hasGroup = group => async (ctx, next) => {
     const groups = ctx.state[getUser.stateUserProperty]['cognito:groups'];
     if (groups && groups instanceof Array && groups.some(g => g === group)) return next();
     ctx.status = 403;
+    return;
   }
   ctx.status = 401;
 };
@@ -55,8 +56,9 @@ const hasGroup = group => async (ctx, next) => {
 const hasScope = scope => async (ctx, next) => {
   if (ctx.state[getUser.stateUserProperty]) {
     const scopes = ctx.state[getUser.stateUserProperty].scope;
-    if (scopes && typeof scopes == 'string' && scope.split(' ').some(s => s === scope)) return next();
+    if (scopes && typeof scopes == 'string' && scopes.split(' ').some(s => s === scope)) return next();
     ctx.status = 403;
+    return;
   }
   ctx.status = 401;
 };
