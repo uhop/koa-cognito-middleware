@@ -8,6 +8,8 @@ The [Koa](https://koajs.com/) middleware to authenticate and authorized users us
 It validates a JWT token (either an id or access token) and populates `ctx.state.user`, or any other property of your choice,
 with its deciphered content. Simple helpers are provided to make decisions on accessibility of API endpoints for a given user.
 
+This project is based on [cognito-toolkit](https://www.npmjs.com/package/cognito-toolkit). It is a sister project of [cognito-express-middleware](https://www.npmjs.com/package/cognito-express-middleware).
+
 # Examples
 
 ```js
