@@ -32,16 +32,19 @@ app.use(getUser({
 const router1 = new Router();
 
 router1.get('/a',
-  async ctx => (ctx.body = 'all allowed'));
+  ctx => (ctx.body = 'all allowed'));
 
 router1.get('/b', isAuthenticated,
-  async ctx => (ctx.body = 'all authenticated'));
+  ctx => (ctx.body = 'all authenticated'));
 
 router1.post('/c', hasGroup('user-type/writers'),
-  async ctx => (ctx.body = 'only a writers group'));
+  ctx => (ctx.body = 'only a writers group'));
 
 router1.post('/d', hasScope('writers'),
-  async ctx => (ctx.body = 'only with a writers scope'));
+  ctx => (ctx.body = 'only with a writers scope'));
+
+router1.post('/user',
+  ctx => (ctx.body = req.user || {}));
 
 app
   .use(router1.routes())
@@ -64,7 +67,7 @@ const validator = async (ctx, groups, scopes) => {
 
 app
   .use(isAllowed(validator))
-  .get('/lift', async ctx => {
+  .get('/lift', ctx => {
     const user = ctx.state.user;
     if (user) {
       user.setAuthCookie(ctx, {domain: 'api.my-domain.com'});
