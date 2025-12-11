@@ -1,6 +1,6 @@
 {
   "name": "koa-cognito-middleware",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "Koa middleware for AWS Cognito integration.",
   "type": "commonjs",
   "main": "index.js",
@@ -24,14 +24,14 @@
   },
   "homepage": "https://github.com/uhop/koa-cognito-middleware#readme",
   "dependencies": {
-    "cognito-toolkit": "^1.0.5"
+    "cognito-toolkit": "^1.0.6"
   },
   "files": [
     "/*.js",
     "/utils"
   ],
   "devDependencies": {
-    "koa": "^2.14.2",
-    "koa-router": "^12.0.0"
+    "koa": "^3.1.1",
+    "koa-router": "^14.0.0"
   }
 }
