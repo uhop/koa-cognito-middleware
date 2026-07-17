@@ -1,11 +1,12 @@
 {
   "name": "koa-cognito-middleware",
-  "version": "1.4.8",
-  "description": "Koa middleware for AWS Cognito integration.",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
-    "start": "node local-test/index.js"
+  "version": "2.0.0",
+  "description": "Frozen re-export of cognito-toolkit/koa — this middleware moved into cognito-toolkit v3.",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": "./index.js"
   },
   "repository": {
     "type": "git",
@@ -23,15 +24,14 @@
     "url": "https://github.com/uhop/koa-cognito-middleware/issues"
   },
   "homepage": "https://github.com/uhop/koa-cognito-middleware#readme",
-  "dependencies": {
-    "cognito-toolkit": "^1.0.6"
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "cognito-toolkit": ">=3.0.0"
   },
   "files": [
-    "/*.js",
-    "/utils"
-  ],
-  "devDependencies": {
-    "koa": "^3.1.1",
-    "koa-router": "^14.0.0"
-  }
+    "index.js",
+    "index.d.ts"
+  ]
 }
